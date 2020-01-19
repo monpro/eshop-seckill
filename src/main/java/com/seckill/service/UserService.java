@@ -1,4 +1,8 @@
 package com.seckill.service;
 
-public class UserService {
+import com.seckill.service.model.UserModel;
+
+public interface UserService {
+
+    UserModel getUserById(Integer id);
 }
