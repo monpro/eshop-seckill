@@ -1,6 +1,7 @@
 package com.seckill.service.impl;
 
 import com.seckill.dao.UserDOMapper;
+import com.seckill.dao.UserPasswordDOMapper;
 import com.seckill.dataobject.UserDO;
 import com.seckill.dataobject.UserPasswordDO;
 import com.seckill.service.UserService;
@@ -16,15 +17,19 @@ public class UserServiceImpl implements UserService {
     private UserDOMapper userDOMapper;
 
     @Autowired
-    private UserPasswordDO userPasswordDO;
+    private UserPasswordDOMapper userPasswordDOMapper;
 
     @Override
     public UserModel getUserById(Integer id) {
         UserDO userDO = userDOMapper.selectByPrimaryKey(id);
+        if(userDO == null){
+            return null;
+        }
 
-        return null;
 
+        UserPasswordDO userPasswordDO = userPasswordDOMapper.selectByUserId(userDO.getId());
 
+        return getUserModelFromDataObject(userDO, userPasswordDO);
     }
 
     private UserModel getUserModelFromDataObject(UserDO userDO, UserPasswordDO userPasswordDO){
