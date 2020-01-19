@@ -41,7 +41,6 @@ public class UserServiceImpl implements UserService {
         if(userPasswordDO != null){
             userModel.setEncryptPassword(userPasswordDO.getEncryptPassword());
         }
-
         return userModel;
     }
 }
