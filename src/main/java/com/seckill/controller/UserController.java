@@ -1,6 +1,8 @@
 package com.seckill.controller;
 
 import com.seckill.controller.viewobject.UserVO;
+import com.seckill.error.BusinessException;
+import com.seckill.error.EnumError;
 import com.seckill.response.CommonResponseType;
 import com.seckill.service.UserService;
 import com.seckill.service.model.UserModel;
@@ -21,9 +23,11 @@ public class UserController {
 
     @RequestMapping("/get")
     @ResponseBody
-    public CommonResponseType getUser(@RequestParam(name="id") Integer id){
+    public CommonResponseType getUser(@RequestParam(name="id") Integer id) throws BusinessException {
         UserModel userModel = userService.getUserById(id);
-
+        if(userModel == null){
+            throw new BusinessException(EnumError.USER_NOT_EXIST);
+        }
         UserVO userVO = getVOFromModel(userModel);
 
         return CommonResponseType.create(userVO);
