@@ -1,11 +1,13 @@
 package com.seckill.controller;
 
 import com.seckill.controller.viewobject.UserVO;
+import com.seckill.dataobject.UserDO;
 import com.seckill.error.BusinessException;
 import com.seckill.error.EnumError;
 import com.seckill.response.CommonResponseType;
 import com.seckill.service.UserService;
 import com.seckill.service.model.UserModel;
+import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,19 +30,30 @@ public class UserController extends BaseController{
     @Autowired
     private HttpServletRequest httpServletRequest;
 
-
+    @RequestMapping(value="/register", method = {RequestMethod.POST}, consumes={CONTENT_TYPE_FORMED})
     public CommonResponseType register(@RequestParam(name="telephone")String telephone,
                                        @RequestParam(name="otpCode")String otpCode,
                                        @RequestParam(name="name")String name,
-                                       @RequestParam(name="gender")String gender,
-                                       @RequestParam(name="age")String age) throws BusinessException {
+                                       @RequestParam(name="gender")Byte gender,
+                                       @RequestParam(name="password")String password,
+                                       @RequestParam(name="age")Integer age) throws BusinessException {
        String inSessionOtpCode = (String) this.httpServletRequest.getSession().getAttribute(telephone);
        if(!inSessionOtpCode.equals(otpCode)){
            throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR, "otp code is wrong");
        }
 
-       return null;
+       UserModel userModel = new UserModel();
+       userModel.setName(name);
+       userModel.setGender(gender);
+       userModel.setAge(age);
+       userModel.setTelephone(telephone);
+       userModel.setRegisterMode("byPhone");
+       userModel.setEncryptPassword(MD5Encoder.encode(password.getBytes()));
+
+       userService.register(userModel);
+       return CommonResponseType.create(null);
     }
+
 
 
 
