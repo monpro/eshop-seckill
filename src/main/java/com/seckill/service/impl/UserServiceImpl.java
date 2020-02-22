@@ -1,9 +1,12 @@
 package com.seckill.service.impl;
 
+import com.alibaba.druid.util.StringUtils;
 import com.seckill.dao.UserDOMapper;
 import com.seckill.dao.UserPasswordDOMapper;
 import com.seckill.dataobject.UserDO;
 import com.seckill.dataobject.UserPasswordDO;
+import com.seckill.error.BusinessException;
+import com.seckill.error.EnumError;
 import com.seckill.service.UserService;
 import com.seckill.service.model.UserModel;
 import org.springframework.beans.BeanUtils;
@@ -30,6 +33,19 @@ public class UserServiceImpl implements UserService {
         UserPasswordDO userPasswordDO = userPasswordDOMapper.selectByUserId(userDO.getId());
 
         return getUserModelFromDataObject(userDO, userPasswordDO);
+    }
+
+    @Override
+    public void register(UserModel userModel) throws BusinessException {
+        if(userModel == null){
+            throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR);
+        }
+        if(StringUtils.isEmpty(userModel.getName())
+                || StringUtils.isEmpty(userModel.getTelephone())
+                || userModel.getAge() == null
+                || userModel.getGender() == null){
+            throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR);
+        }
     }
 
     private UserModel getUserModelFromDataObject(UserDO userDO, UserPasswordDO userPasswordDO){
