@@ -12,8 +12,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import sun.misc.BASE64Encoder;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -21,7 +25,7 @@ import java.util.Random;
 
 @Controller("user")
 @RequestMapping("/user")
-@CrossOrigin
+@CrossOrigin(allowCredentials = "true", allowedHeaders = "*")
 public class UserController extends BaseController{
 
     @Autowired
@@ -36,7 +40,7 @@ public class UserController extends BaseController{
                                        @RequestParam(name="name")String name,
                                        @RequestParam(name="gender")Byte gender,
                                        @RequestParam(name="password")String password,
-                                       @RequestParam(name="age")Integer age) throws BusinessException {
+                                       @RequestParam(name="age")Integer age) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
        String inSessionOtpCode = (String) this.httpServletRequest.getSession().getAttribute(telephone);
        if(!inSessionOtpCode.equals(otpCode)){
            throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR, "otp code is wrong");
@@ -48,10 +52,19 @@ public class UserController extends BaseController{
        userModel.setAge(age);
        userModel.setTelephone(telephone);
        userModel.setRegisterMode("byPhone");
-       userModel.setEncryptPassword(MD5Encoder.encode(password.getBytes()));
+       userModel.setEncryptPassword(this.EncodeByMd5(password));
 
        userService.register(userModel);
        return CommonResponseType.create(null);
+    }
+
+    public String EncodeByMd5(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        MessageDigest md5 = MessageDigest.getInstance("MD5");
+        BASE64Encoder base64Encoder = new BASE64Encoder();
+
+        String encPassWord = base64Encoder.encode(md5.digest(password.getBytes("utf-8")));
+
+        return encPassWord;
     }
 
 

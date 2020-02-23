@@ -11,6 +11,7 @@ import com.seckill.service.UserService;
 import com.seckill.service.model.UserModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,8 +51,11 @@ public class UserServiceImpl implements UserService {
         }
 
         UserDO userDO = convertFromModel(userModel);
-        userDOMapper.insertSelective(userDO);
-
+        try {
+            userDOMapper.insertSelective(userDO);
+        }catch(DuplicateKeyException ex){
+            throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR, "telephone number is existed");
+        }
         UserPasswordDO userPasswordDO = convertPasswordFromModel(userModel);
         userPasswordDOMapper.insertSelective(userPasswordDO);
     }
