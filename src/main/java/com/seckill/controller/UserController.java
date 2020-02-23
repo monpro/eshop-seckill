@@ -1,5 +1,6 @@
 package com.seckill.controller;
 
+import com.alibaba.druid.util.StringUtils;
 import com.seckill.controller.viewobject.UserVO;
 import com.seckill.dataobject.UserDO;
 import com.seckill.error.BusinessException;
@@ -35,6 +36,7 @@ public class UserController extends BaseController{
     private HttpServletRequest httpServletRequest;
 
     @RequestMapping(value="/register", method = {RequestMethod.POST}, consumes={CONTENT_TYPE_FORMED})
+    @ResponseBody
     public CommonResponseType register(@RequestParam(name="telephone")String telephone,
                                        @RequestParam(name="otpCode")String otpCode,
                                        @RequestParam(name="name")String name,
@@ -65,6 +67,21 @@ public class UserController extends BaseController{
         String encPassWord = base64Encoder.encode(md5.digest(password.getBytes("utf-8")));
 
         return encPassWord;
+    }
+
+    @RequestMapping(value="/login", method = {RequestMethod.POST}, consumes={CONTENT_TYPE_FORMED})
+    @ResponseBody
+    public CommonResponseType login(@RequestParam(name="telephone")String telephone,
+                                    @RequestParam(name="password")String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
+        if(StringUtils.isEmpty(telephone) || StringUtils.isEmpty(password))
+            throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR);
+
+        UserModel userModel = userService.validateLogin(telephone, this.EncodeByMd5(password));
+
+        this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
+        this.httpServletRequest.getSession().setAttribute("LOGIN_USER", userModel);
+
+        return CommonResponseType.create(null);
     }
 
 

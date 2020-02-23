@@ -33,6 +33,8 @@ public interface UserDOMapper {
      *
      * @mbg.generated Thu Jan 02 12:47:30 AEDT 2020
      */
+    UserDO selectByTelephone(String telephone);
+
     UserDO selectByPrimaryKey(Integer id);
 
     /**

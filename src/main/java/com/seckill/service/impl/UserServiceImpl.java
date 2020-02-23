@@ -80,6 +80,21 @@ public class UserServiceImpl implements UserService {
         return userDO;
     }
 
+    @Override
+    public UserModel validateLogin(String telephone, String encryptPassword) throws BusinessException {
+        UserDO userDO = userDOMapper.selectByTelephone(telephone);
+        if(userDO == null)
+            throw new BusinessException(EnumError.USER_LOGIN_FAIL);
+
+        UserPasswordDO userPasswordDO = userPasswordDOMapper.selectByUserId(userDO.getId());
+        UserModel userModel = getUserModelFromDataObject(userDO, userPasswordDO);
+
+        if(!StringUtils.equals(encryptPassword, userModel.getEncryptPassword()))
+            throw new BusinessException(EnumError.USER_LOGIN_FAIL);
+        return userModel;
+
+    }
+
     private UserModel getUserModelFromDataObject(UserDO userDO, UserPasswordDO userPasswordDO){
         if(userDO == null){
             return null;
