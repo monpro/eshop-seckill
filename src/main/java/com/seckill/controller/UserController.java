@@ -72,10 +72,16 @@ public class UserController extends BaseController{
     @RequestMapping(value="/login", method = {RequestMethod.POST}, consumes={CONTENT_TYPE_FORMED})
     @ResponseBody
     public CommonResponseType login(@RequestParam(name="telephone")String telephone,
-                                    @RequestParam(name="password")String password) throws BusinessException {
+                                    @RequestParam(name="password")String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
         if(StringUtils.isEmpty(telephone) || StringUtils.isEmpty(password))
             throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR);
-        return null;
+
+        UserModel userModel = userService.validateLogin(telephone, this.EncodeByMd5(password));
+
+        this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
+        this.httpServletRequest.getSession().setAttribute("LOGIN_USER", userModel);
+
+        return CommonResponseType.create(null);
     }
 
 
