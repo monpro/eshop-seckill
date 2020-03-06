@@ -9,6 +9,8 @@ import com.seckill.error.BusinessException;
 import com.seckill.error.EnumError;
 import com.seckill.service.UserService;
 import com.seckill.service.model.UserModel;
+import com.seckill.validator.ValidationResult;
+import com.seckill.validator.ValidatorImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -23,6 +25,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserPasswordDOMapper userPasswordDOMapper;
+
+    @Autowired
+    private ValidatorImpl validator;
 
     @Override
     public UserModel getUserById(Integer id) {
@@ -43,12 +48,18 @@ public class UserServiceImpl implements UserService {
         if(userModel == null){
             throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR);
         }
-        if(StringUtils.isEmpty(userModel.getName())
-                || StringUtils.isEmpty(userModel.getTelephone())
-                || userModel.getAge() == null
-                || userModel.getGender() == null){
-            throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR);
-        }
+//        if(StringUtils.isEmpty(userModel.getName())
+//                || StringUtils.isEmpty(userModel.getTelephone())
+//                || userModel.getAge() == null
+//                || userModel.getGender() == null){
+//            throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR);
+//        }
+
+        ValidationResult result = validator.validate(userModel);
+
+        if(result.isHasErrors()){
+        throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR, result.getErrorMsg());
+    }
 
         UserDO userDO = convertFromModel(userModel);
         try {
