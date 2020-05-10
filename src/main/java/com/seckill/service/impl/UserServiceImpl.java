@@ -7,6 +7,7 @@ import com.seckill.dataobject.UserDO;
 import com.seckill.dataobject.UserPasswordDO;
 import com.seckill.error.BusinessException;
 import com.seckill.error.EnumError;
+import com.seckill.service.OrderService;
 import com.seckill.service.UserService;
 import com.seckill.service.model.UserModel;
 import com.seckill.validator.ValidationResult;
@@ -117,4 +118,5 @@ public class UserServiceImpl implements UserService {
         }
         return userModel;
     }
+
 }
