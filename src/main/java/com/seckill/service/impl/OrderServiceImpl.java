@@ -1,7 +1,9 @@
 package com.seckill.service.impl;
 
 import com.seckill.dao.OrderDOMapper;
+import com.seckill.dao.SequenceDOMapper;
 import com.seckill.dataobject.OrderDO;
+import com.seckill.dataobject.SequenceDO;
 import com.seckill.error.BusinessException;
 import com.seckill.error.EnumError;
 import com.seckill.service.ItemService;
@@ -16,9 +18,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
+    @Autowired
+    private SequenceDOMapper sequenceDOMapper;
 
     @Autowired
     private ItemService itemService;
@@ -65,6 +72,33 @@ public class OrderServiceImpl implements OrderService {
         return null;
     }
 
+    private String generateOrderNo(){
+        StringBuilder stringBuilder = new StringBuilder();
+        //get data string
+        LocalDateTime now = LocalDateTime.now();
+        String nowDate = now.format(DateTimeFormatter.ISO_DATE).replace("-", "");
+        stringBuilder.append(nowDate);
+
+        //get sequence string
+        int sequence = 0;
+
+        SequenceDO sequenceDO = sequenceDOMapper.getSequenceByName("order_info");
+        sequence = sequenceDO.getCurrentValue();
+        sequenceDO.setCurrentValue(sequenceDO.getCurrentValue() + sequenceDO.getStep());
+        sequenceDOMapper.updateByPrimaryKey(sequenceDO);
+
+        String sequenceStr  = String.valueOf(sequence);
+        for(int i = 0; i < 6 - sequenceStr.length(); i++){
+            stringBuilder.append(0);
+        }
+        stringBuilder.append(sequenceStr);
+
+        //hardcode partition string
+        stringBuilder.append("11");
+        return stringBuilder.toString();
+    }
+
+
 
     public OrderDO convertOrderModelToDO(OrderModel orderModel){
         if(orderModel == null){
@@ -76,4 +110,5 @@ public class OrderServiceImpl implements OrderService {
         return orderDO;
 
     }
+
 }
