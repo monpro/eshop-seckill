@@ -15,6 +15,7 @@ import com.seckill.service.model.UserModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -66,13 +67,16 @@ public class OrderServiceImpl implements OrderService {
         orderModel.setItemPrice(itemModel.getPrice());
         orderModel.setOrderPrice(itemModel.getPrice().multiply(new BigDecimal(amount)));
 
+        orderModel.setId(generateOrderNo());
         OrderDO orderDO = convertOrderModelToDO(orderModel);
         orderDOMapper.insertSelective(orderDO);
 
-        return null;
+        itemService.increaseSales(itemId, amount);
+        return orderModel;
     }
 
-    private String generateOrderNo(){
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    String generateOrderNo(){
         StringBuilder stringBuilder = new StringBuilder();
         //get data string
         LocalDateTime now = LocalDateTime.now();
@@ -107,6 +111,9 @@ public class OrderServiceImpl implements OrderService {
 
         OrderDO orderDO = new OrderDO();
         BeanUtils.copyProperties(orderModel, orderDO);
+        orderDO.setItemPrice(orderModel.getItemPrice().doubleValue());
+        orderDO.setOrderPrice(orderModel.getOrderPrice().doubleValue());
+
         return orderDO;
 
     }
