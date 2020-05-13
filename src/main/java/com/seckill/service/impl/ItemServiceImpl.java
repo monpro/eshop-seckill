@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @Service
 public class ItemServiceImpl implements ItemService {
 
+
     @Autowired
     private ValidatorImpl validator;
 
@@ -101,6 +102,16 @@ public class ItemServiceImpl implements ItemService {
         // DO -> Model
         ItemModel itemModel = convertDataObjectToModel(itemDO, itemStockDO);
         return itemModel;
+    }
+
+    @Override
+    public boolean decreaseStock(Integer itemId, Integer amount) throws BusinessException {
+        int updatedRow = itemStockDOMapper.decreaseStock(itemId, amount);
+        if(updatedRow > 0){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     private ItemModel convertDataObjectToModel(ItemDO itemDO, ItemStockDO itemStockDO){
