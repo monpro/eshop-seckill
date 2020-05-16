@@ -26,6 +26,9 @@ public class ItemModel {
     @NotBlank(message = "imgUrl cannot be null")
     private String imgUrl;
 
+    //if promoModel != null, then there is promo activity to be finished
+    private PromoModel promoModel;
+
     public Integer getId() {
         return id;
     }
@@ -80,5 +83,13 @@ public class ItemModel {
 
     public void setImgUrl(String imgUrl) {
         this.imgUrl = imgUrl;
+    }
+
+    public PromoModel getPromoModel() {
+        return promoModel;
+    }
+
+    public void setPromoModel(PromoModel promoModel) {
+        this.promoModel = promoModel;
     }
 }

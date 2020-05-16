@@ -15,6 +15,7 @@ import com.seckill.service.model.UserModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -38,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderModel createOrder(Integer userId, Integer itemId, Integer amount) throws BusinessException {
+    public OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount) throws BusinessException {
         ItemModel itemModel = itemService.getItemById(itemId);
         if(itemModel == null){
             throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR, "doesn't exist this model");
@@ -51,8 +52,18 @@ public class OrderServiceImpl implements OrderService {
 
         if(amount <= 0 || amount > 99){
             throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR, "amount not in range");
-
         }
+
+        if(promoId != null){
+            if(promoId.intValue() != itemModel.getPromoModel().getId()){
+                throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR, "promo is not existed with this item");
+            }else if(itemModel.getPromoModel().getStatus().intValue() != 2){
+                throw new BusinessException(EnumError.PARAMETER_INVALIDATION_ERROR, "promo is not start");
+
+            }
+        }
+
+
 
         boolean result = itemService.decreaseStock(itemId, amount);
         if(!result){
@@ -63,16 +74,24 @@ public class OrderServiceImpl implements OrderService {
         orderModel.setUserId(userId);
         orderModel.setItemId(itemId);
         orderModel.setAmount(amount);
-        orderModel.setItemPrice(itemModel.getPrice());
-        orderModel.setOrderPrice(itemModel.getPrice().multiply(new BigDecimal(amount)));
+        if(promoId != null){
+            orderModel.setItemPrice(itemModel.getPromoModel().getPromoPrice());
+        }else{
+            orderModel.setItemPrice(itemModel.getPrice());
+        }
+        orderModel.setPromoId(promoId);
+        orderModel.setOrderPrice(orderModel.getItemPrice().multiply(new BigDecimal(amount)));
 
+        orderModel.setId(generateOrderNo());
         OrderDO orderDO = convertOrderModelToDO(orderModel);
         orderDOMapper.insertSelective(orderDO);
 
-        return null;
+        itemService.increaseSales(itemId, amount);
+        return orderModel;
     }
 
-    private String generateOrderNo(){
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    String generateOrderNo(){
         StringBuilder stringBuilder = new StringBuilder();
         //get data string
         LocalDateTime now = LocalDateTime.now();
@@ -107,6 +126,9 @@ public class OrderServiceImpl implements OrderService {
 
         OrderDO orderDO = new OrderDO();
         BeanUtils.copyProperties(orderModel, orderDO);
+        orderDO.setItemPrice(orderModel.getItemPrice().doubleValue());
+        orderDO.setOrderPrice(orderModel.getOrderPrice().doubleValue());
+
         return orderDO;
 
     }
