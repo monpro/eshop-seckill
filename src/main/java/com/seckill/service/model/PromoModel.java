@@ -6,15 +6,29 @@ import java.math.BigDecimal;
 
 public class PromoModel {
 
+    //promo activity status
+    // 1 not start, 2 during, 3 ended
+    private Integer status;
+
     private Integer id;
 
     private String promoName;
 
     private DateTime startDate;
 
+    private DateTime endDate;
+
     private Integer itemId;
 
     private BigDecimal promoPrice;
+
+    public DateTime getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(DateTime endDate) {
+        this.endDate = endDate;
+    }
 
     public Integer getId() {
         return id;
@@ -54,5 +68,13 @@ public class PromoModel {
 
     public void setPromoPrice(BigDecimal promoPrice) {
         this.promoPrice = promoPrice;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }
